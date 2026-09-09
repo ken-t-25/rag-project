@@ -23,7 +23,11 @@ def read_page_blocks( page, page_num ):
     page_info[ "text" ] = []
     blocks = page.get_text( "blocks" )
     for b in blocks:
-        _, _, _, _, text, _, block_type = b
+        x0, y0, x1, y1, text, _, block_type = b
         if block_type == TEXT_BLOCK_TYPE:
-            page_info[ "text" ].append( text )
+            page_info[ "text" ].append( { "text": text, "x0": x0, "y0": y0, "x1": x1, "y1": y1 } )
+    tables = page.find_tables()
+    page_info[ "tables" ] = []
+    for t in tables.tables:
+        page_info[ "tables" ].append( t.bbox )
     return page_info

@@ -1,7 +1,10 @@
+from src.data_processor.chucker import clean_block, get_non_table_ratio
+
 MAX_CHUNK_TOKENS = 240
 OVERLAP_TOKENS = 40
 MIN_CHUNK_TOKENS = 80
 MIN_BLOCK_SIZE = 5
+MIN_NON_TABLE_CONTENT_RATIO = 0.5
 
 class Chunker():
 
@@ -11,20 +14,19 @@ class Chunker():
         self.overlap_tokens = overlap_tokens
         self.min_chunk_tokens = min_chunk_tokens
 
-    # This helper function cleans a block by:
-    # 1) removing all website addresses (i.e. substrings starting with "http" until the next " ", \n, \r, or \t is seen)
-    def clean_block( self, block ):
-        site_idx = block.find( "http", 0 )
-        while site_idx > 0:
-            potential_end_idx = [ block.find( " ", site_idx  ),
-                                  block.find( "\n", site_idx  ),
-                                  block.find( "\r", site_idx  ),
-                                  block.find( "\t", site_idx  ) ]
-            potential_end_idx = [ i for i in potential_end_idx if i != -1 ]
-            end_site_idx = min( potential_end_idx ) if potential_end_idx else len( block )
-            block = block[ :site_idx ] + block[ end_site_idx + 1: ]
-            site_idx = block.find( "http", site_idx )
-        return block
+    # This helper function processes and evaluates a block by:
+    # 1) cleaning the block
+    # 2) returning the cleaned block if all following conditions are met, else return None:
+    #    a) block length is greater than or equal to MIN_BLOCK_SIZE
+    #    b) at least 50% of the block is not table data
+    def process_and_evaluate_block( self, block, tables ):
+        cleaned_block = clean_block( block[ "text" ] )
+        if len( cleaned_block ) < MIN_BLOCK_SIZE:
+            return None
+        elif get_non_table_ratio( block, tables ) < MIN_NON_TABLE_CONTENT_RATIO:
+            return None
+        else:
+            return cleaned_block
 
     def page_block_chunker( self, pages_info ):
         chunks = []
@@ -59,8 +61,8 @@ class Chunker():
 
         for p in pages_info:
             for block in p[ "text" ]:
-                cleaned_block = self.clean_block( block)
-                if len( cleaned_block ) < MIN_BLOCK_SIZE:
+                block = self.process_and_evaluate_block( block, p[ "tables" ] )
+                if not block:
                     continue
                 token_ids = self.tokenizer.encode( block, add_special_tokens=False )
                 if len( token_ids ) + curr_chunk_len <= self.max_chunk_tokens:
