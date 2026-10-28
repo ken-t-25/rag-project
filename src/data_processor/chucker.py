@@ -1,4 +1,4 @@
-from src.data_processor.chucker import clean_block, get_non_table_ratio
+from src.data_processor.block_processor import clean_block, get_non_table_ratio, is_tabular_block
 
 MAX_CHUNK_TOKENS = 240
 OVERLAP_TOKENS = 40
@@ -19,11 +19,14 @@ class Chunker():
     # 2) returning the cleaned block if all following conditions are met, else return None:
     #    a) block length is greater than or equal to MIN_BLOCK_SIZE
     #    b) at least 50% of the block is not table data
+    #    c) the block's text is not laid out like a table (catches tables find_tables misses)
     def process_and_evaluate_block( self, block, tables ):
         cleaned_block = clean_block( block[ "text" ] )
         if len( cleaned_block ) < MIN_BLOCK_SIZE:
             return None
         elif get_non_table_ratio( block, tables ) < MIN_NON_TABLE_CONTENT_RATIO:
+            return None
+        elif is_tabular_block( cleaned_block ):
             return None
         else:
             return cleaned_block
@@ -73,9 +76,9 @@ class Chunker():
                     end_page = p[ "page_number" ]
                     if curr_chunk_len == self.max_chunk_tokens:
                         complete_chunk_handler()
-                elif curr_chunk_len >= self.min_chunk_tokens:
-                    complete_chunk_handler()
                 else:
+                    if curr_chunk_len >= self.min_chunk_tokens:
+                        complete_chunk_handler()
                     block_start_idx = 0
                     while block_start_idx < len( token_ids ):
                         remain_chunk_len = self.max_chunk_tokens - curr_chunk_len

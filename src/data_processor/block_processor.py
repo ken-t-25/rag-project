@@ -29,7 +29,9 @@ def get_non_table_ratio( block, tables ):
             return ( bx1 - bx0 ) * ( by1 - by0 )
         tx0, ty0, tx1, ty1 = tables[ table_idx ]
         # if the current table does not overlap with block, proceed to the next table
-        if not ( bx0 < tx0 < bx1 or bx0 < tx1 < bx1 ) or not ( by0 < ty0 < by1 or by0 < ty1 < by1 ):
+        # (the intervals overlap iff each one starts before the other ends, which also covers a table
+        # that extends past the block on both sides)
+        if not ( tx0 < bx1 and bx0 < tx1 ) or not ( ty0 < by1 and by0 < ty1 ):
             return get_non_table_area( bx0, by0, bx1, by1, table_idx + 1 )
         area = 0
         if tx0 > bx0:
@@ -44,3 +46,19 @@ def get_non_table_ratio( block, tables ):
 
     non_table_area = get_non_table_area( x0, y0, x1, y1, 0 )
     return non_table_area / block_area
+
+# This helper function decides whether a block is tabular (table cells or figure labels) by checking that:
+# 1) the block has at least MIN_TABULAR_LINES non-empty lines
+# 2) at least MIN_SHORT_LINE_RATIO of those lines have at most MAX_SHORT_LINE_WORDS words
+# PyMuPDF puts each cell of a table on its own line, while prose lines span the page width, so this catches
+# borderless tables that page.find_tables() (which looks for ruling lines) misses
+MIN_TABULAR_LINES = 3
+MAX_SHORT_LINE_WORDS = 3
+MIN_SHORT_LINE_RATIO = 0.75
+
+def is_tabular_block( block ):
+    lines = [ line for line in block.split( "\n" ) if line.strip() ]
+    if len( lines ) < MIN_TABULAR_LINES:
+        return False
+    short_lines = sum( len( line.split() ) <= MAX_SHORT_LINE_WORDS for line in lines )
+    return short_lines / len( lines ) >= MIN_SHORT_LINE_RATIO
