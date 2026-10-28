@@ -1,0 +1,950 @@
+{
+    "file_name": "exploring_the_limits_of_transfer_learning_with_a_unified_text-to-text_transformer",
+    "queries": [
+        {
+            "id": 1,
+            "query": "What is the main idea behind the text-to-text framework proposed by T5?",
+            "level": 1,
+            "passages": [
+                {
+                    "page": 2,
+                    "text": "The basic idea underlying our work is to treat every text processing problem as a “text-to-text” problem, i.e. taking text as input and producing new text as output."
+                },
+                {
+                    "page": 2,
+                    "text": "Crucially, the text-to-text framework allows us to directly apply the same model, objective, training procedure, and decoding process to every task we consider."
+                },
+                {
+                    "page": 3,
+                    "text": "Every task we consider—including translation, question answering, and classification—is cast as feeding our model text as input and training it to generate some target text. This allows us to use the same model, loss function, hyperparameters, etc. across our diverse set of tasks."
+                }
+            ]
+        },
+        {
+            "id": 2,
+            "query": "What is the Colossal Clean Crawled Corpus (C4)?",
+            "level": 1,
+            "passages": [
+                {
+                    "page": 3,
+                    "text": "In order to perform experiments at this scale, we introduce the “Colossal Clean Crawled Corpus” (C4), a data set consisting of hundreds of gigabytes of clean English text scraped from the web."
+                },
+                {
+                    "page": 7,
+                    "text": "This produces a collection of text that is not only orders of magnitude larger than most data sets used for pre-training (about 750 GB) but also comprises reasonably clean and natural English text. We dub this data set the “Colossal Clean Crawled Corpus” (or C4 for short) and release it as part of TensorFlow Datasets."
+                },
+                {
+                    "page": 42,
+                    "text": "We introduced the “Colossal Clean Crawled Corpus” (C4), which comprises heuristically-cleaned text from the Common Crawl web dump."
+                }
+            ]
+        },
+        {
+            "id": 3,
+            "query": "How was the C4 dataset created from Common Crawl?",
+            "level": 1,
+            "passages": [
+                {
+                    "page": 6,
+                    "text": "Unfortunately, the majority of the resulting text is not natural language. Instead, it largely comprises gibberish or boiler-plate text like menus, error messages, or duplicate text."
+                },
+                {
+                    "page": 6,
+                    "text": "To address these issues, we used the following heuristics for cleaning up Common Crawl’s web extracted text: • We only retained lines that ended in a terminal punctuation mark (i.e. a period, exclamation mark, question mark, or end quotation mark). • We discarded any page with fewer than 3 sentences and only retained lines that contained at least 5 words."
+                },
+                {
+                    "page": 6,
+                    "text": "To deduplicate the data set, we discarded all but one of any three-sentence span occurring more than once in the data set. Additionally, since most of our downstream tasks are focused on English-language text, we used langdetect7 to filter out any pages that were not classified as English with a probability of at least 0.99."
+                },
+                {
+                    "page": 7,
+                    "text": "To assemble our base data set, we downloaded the web extracted text from April 2019 and applied the aforementioned filtering."
+                }
+            ]
+        },
+        {
+            "id": 4,
+            "query": "What Transformer architecture does the T5 model use?",
+            "level": 1,
+            "passages": [
+                {
+                    "page": 4,
+                    "text": "Overall, our encoder-decoder Transformer implementation closely follows its originally-proposed form (Vaswani et al., 2017)."
+                },
+                {
+                    "page": 5,
+                    "text": "To summarize, our model is roughly equivalent to the original Transformer proposed by Vaswani et al. (2017) with the exception of removing the Layer Norm bias, placing the layer normalization outside the residual path, and using a different position embedding scheme."
+                },
+                {
+                    "page": 11,
+                    "text": "For our model, we use a standard encoder-decoder Transformer as proposed by Vaswani et al. (2017)."
+                }
+            ]
+        },
+        {
+            "id": 5,
+            "query": "What pre-training objective does the final T5 model use?",
+            "level": 1,
+            "passages": [
+                {
+                    "page": 36,
+                    "text": "Objective We swap out the i.i.d. denoising objective in our baseline for the span-corruption objective described in Section 3.3.4, which was loosely inspired by SpanBERT (Joshi et al., 2019). Specifically, we use a mean span length of 3 and corrupt 15% of the original sequence."
+                },
+                {
+                    "page": 42,
+                    "text": "For unsupervised training, we extracted text from our C4 data set and applied a denoising objective that corrupts contiguous spans of tokens."
+                }
+            ]
+        },
+        {
+            "id": 7,
+            "query": "How many parameters does the baseline model have?",
+            "level": 1,
+            "passages": [
+                {
+                    "page": 11,
+                    "text": "In total, this results in a model with about 220 million parameters. This is roughly twice the number of parameters of BERTBASE since our baseline model contains two layer stacks instead of one."
+                }
+            ]
+        },
+        {
+            "id": 8,
+            "query": "Which optimizer is used to train the models?",
+            "level": 1,
+            "passages": [
+                {
+                    "page": 11,
+                    "text": "For optimization, we use AdaFactor (Shazeer and Stern, 2018)."
+                },
+                {
+                    "page": 38,
+                    "text": "Apart from those changes mentioned above, we use the same training procedure and hyperparameters as our baseline (AdaFactor optimizer, inverse square root learning rate schedule for pre-training, constant learning rate for fine-tuning, dropout regularization, vocabulary, etc.)."
+                }
+            ]
+        },
+        {
+            "id": 9,
+            "query": "For how many steps and with what batch size is the baseline model pre-trained?",
+            "level": 1,
+            "passages": [
+                {
+                    "page": 11,
+                    "text": "We pre-train each model for 219 = 524,288 steps on C4 before fine-tuning. We use a maximum sequence length of 512 and a batch size of 128 sequences."
+                }
+            ]
+        },
+        {
+            "id": 10,
+            "query": "What learning rate schedule is used during pre-training?",
+            "level": 1,
+            "passages": [
+                {
+                    "page": 12,
+                    "text": "During pre-training, we use an “inverse square root” learning rate schedule"
+                },
+                {
+                    "page": 12,
+                    "text": "This sets a constant learning rate of 0.01 for the first 104 steps, then exponentially decays the learning rate until pre-training is over."
+                }
+            ]
+        },
+        {
+            "id": 11,
+            "query": "What learning rate is used when fine-tuning?",
+            "level": 1,
+            "passages": [
+                {
+                    "page": 12,
+                    "text": "We use a constant learning rate of 0.001 when fine-tuning."
+                }
+            ]
+        },
+        {
+            "id": 12,
+            "query": "What decoding method is used at test time in the baseline experiments?",
+            "level": 1,
+            "passages": [
+                {
+                    "page": 11,
+                    "text": "At test time, we use greedy decoding (i.e. choosing the highest-probability logit at every timestep)."
+                }
+            ]
+        },
+        {
+            "id": 14,
+            "query": "What dropout probability does the baseline model use?",
+            "level": 1,
+            "passages": [
+                {
+                    "page": 11,
+                    "text": "For regularization, we use a dropout probability of 0.1 everywhere dropout is applied in the model."
+                }
+            ]
+        },
+        {
+            "id": 16,
+            "query": "How many parameters does the largest T5 model have?",
+            "level": 1,
+            "passages": [
+                {
+                    "page": 37,
+                    "text": "for “11B” we use dff = 65,536 with 128-headed attention producing a model with about 11 billion parameters."
+                }
+            ]
+        },
+        {
+            "id": 17,
+            "query": "What model sizes of T5 were trained?",
+            "level": 1,
+            "passages": [
+                {
+                    "page": 39,
+                    "text": "Small, Base, Large, 3B, and 11B refer to model configurations with 60 million, 220 million, 770 million, 3 billion, and 11 billion parameters, respectively."
+                }
+            ]
+        },
+        {
+            "id": 18,
+            "query": "What hardware were the models trained on?",
+            "level": 1,
+            "passages": [
+                {
+                    "page": 5,
+                    "text": "As a result, we use a combination of model and data parallelism and train models on “slices” of Cloud TPU Pods."
+                },
+                {
+                    "page": 5,
+                    "text": "TPU pods are are multi-rack ML supercomputers that contain 1,024 TPU v3 chips connected via a high-speed 2D mesh interconnect with supporting CPU host machines."
+                }
+            ]
+        },
+        {
+            "id": 19,
+            "query": "How many relative position embeddings does T5 use?",
+            "level": 1,
+            "passages": [
+                {
+                    "page": 5,
+                    "text": "In this work, we use 32 embeddings for all of our models with ranges that increase in size logarithmically up to an offset of 128 beyond which we assign all relative positions to the same embedding."
+                }
+            ]
+        },
+        {
+            "id": 20,
+            "query": "Which month of Common Crawl data was used to build C4?",
+            "level": 1,
+            "passages": [
+                {
+                    "page": 7,
+                    "text": "To assemble our base data set, we downloaded the web extracted text from April 2019 and applied the aforementioned filtering."
+                }
+            ]
+        },
+        {
+            "id": 21,
+            "query": "Who created the C4 data set?",
+            "level": 1,
+            "passages": [
+                {
+                    "page": 45,
+                    "text": "Adam oversaw all engineering aspects for this project, created the C4 data set, implemented our data set pipeline, and added various benchmark data sets."
+                }
+            ]
+        },
+        {
+            "id": 23,
+            "query": "How does T5 formulate tasks such as translation, summarization, and question answering within a unified framework?",
+            "level": 2,
+            "passages": [
+                {
+                    "page": 3,
+                    "text": "Every task we consider—including translation, question answering, and classification—is cast as feeding our model text as input and training it to generate some target text."
+                },
+                {
+                    "page": 8,
+                    "text": "In order to train a single model on the diverse set of tasks described above, we cast all of the tasks we consider into a “text-to-text” format—that is, a task where the model is fed some text for context or conditioning and is then asked to produce some output text."
+                },
+                {
+                    "page": 8,
+                    "text": "To specify which task the model should perform, we add a task-specific (text) prefix to the original input sequence before feeding it to the model. As an example, to ask the model to translate the sentence “That is good.” from English to German, the model would be fed the sequence “translate English to German: That is good.” and would be trained to output “Das ist gut.”"
+                },
+                {
+                    "page": 8,
+                    "text": "In our experiments, the model is fed the question and its context and asked to generate the answer token-by-token."
+                }
+            ]
+        },
+        {
+            "id": 24,
+            "query": "What is span corruption, and how is it used as a pre-training objective?",
+            "level": 2,
+            "passages": [
+                {
+                    "page": 23,
+                    "text": "To test this idea, we consider an objective that specifically corrupts contiguous, randomly-spaced spans of tokens. This objective can be parametrized by the proportion of tokens to be corrupted and the total number of corrupted spans."
+                },
+                {
+                    "page": 24,
+                    "text": "We also find in particular that using an average span length of 3 slightly (but significantly) outperforms the i.i.d. objective on most non-translation benchmarks. Fortunately, the span-corruption objective also provides some speedup during training compared to the i.i.d. noise approach because span corruption produces shorter sequences on average."
+                },
+                {
+                    "page": 36,
+                    "text": "Objective We swap out the i.i.d. denoising objective in our baseline for the span-corruption objective described in Section 3.3.4, which was loosely inspired by SpanBERT (Joshi et al., 2019). Specifically, we use a mean span length of 3 and corrupt 15% of the original sequence."
+                }
+            ]
+        },
+        {
+            "id": 25,
+            "query": "What are sentinel tokens, and what role do they play in T5's corruption objective?",
+            "level": 2,
+            "passages": [
+                {
+                    "page": 13,
+                    "text": "Each consecutive span of corrupted tokens is replaced by a sentinel token (shown as <X> and <Y>) that is unique over the example."
+                },
+                {
+                    "page": 13,
+                    "text": "All consecutive spans of dropped-out tokens are replaced by a single sentinel token. Each sentinel token is assigned a token ID that is unique to the sequence. The sentinel IDs are special tokens which are added to our vocabulary and do not correspond to any wordpiece. The target then corresponds to all of the dropped-out spans of tokens, delimited by the same sentinel tokens used in the input sequence plus a final sentinel token to mark the end of the target sequence."
+                },
+                {
+                    "page": 22,
+                    "text": "First, instead of replacing each corrupted token with a mask token, we replace the entirety of each consecutive span of corrupted tokens with a unique mask token. Then, the target sequence becomes the concatenation of the “corrupted” spans, each prefixed by the mask token used to replace it in the input."
+                }
+            ]
+        },
+        {
+            "id": 28,
+            "query": "What did the authors investigate regarding different pre-training objectives?",
+            "level": 2,
+            "passages": [
+                {
+                    "page": 20,
+                    "text": "In this section, we perform a procedural exploration of the space of unsupervised objectives."
+                },
+                {
+                    "page": 21,
+                    "text": "To begin with, we compare three techniques that are inspired by commonly-used objectives but differ significantly in their approach."
+                },
+                {
+                    "page": 24,
+                    "text": "Overall, the most significant difference in performance we observed was that denoising objectives outperformed language modeling and deshuffling for pre-training. We did not observe a remarkable difference across the many variants of the denoising objectives we explored."
+                },
+                {
+                    "page": 25,
+                    "text": "We first consider a few disparate approaches in Section 3.3.1 and find that a BERT-style denoising objective performs best. Then, we consider various methods for simplifying the BERT objective so that it produces shorter target sequences in Section 3.3.2."
+                }
+            ]
+        },
+        {
+            "id": 29,
+            "query": "How did the authors study the effect of model size and training duration?",
+            "level": 2,
+            "passages": [
+                {
+                    "page": 34,
+                    "text": "In this section, we compare these different approaches by addressing the following premise: “You were just given 4× more compute. How should you use it?”"
+                },
+                {
+                    "page": 34,
+                    "text": "Using our baseline and these two larger models, we consider three ways of using 4× as much computation: Training for 4× as many steps, training for 2× as many steps with the 2× bigger model, and training the 4× bigger model for the “baseline” number of training steps."
+                },
+                {
+                    "page": 35,
+                    "text": "Unsurprisingly, increasing the training time and/or model size consistently improves the baseline."
+                }
+            ]
+        },
+        {
+            "id": 30,
+            "query": "How large is T5's vocabulary, and how was it built to support translation?",
+            "level": 2,
+            "passages": [
+                {
+                    "page": 12,
+                    "text": "We use SentencePiece (Kudo and Richardson, 2018) to encode text as WordPiece tokens (Sennrich et al., 2015; Kudo, 2018). For all experiments, we use a vocabulary of 32,000 wordpieces."
+                },
+                {
+                    "page": 12,
+                    "text": "To address this, we classified pages from the Common Crawl scrape used in C4 as German, French, and Romanian. Then, we trained our SentencePiece model on a mixture of 10 parts of English C4 data with 1 part each of data classified as German, French or Romanian."
+                }
+            ]
+        },
+        {
+            "id": 31,
+            "query": "How is the STS-B regression task handled in the text-to-text format?",
+            "level": 2,
+            "passages": [
+                {
+                    "page": 9,
+                    "text": "We found that most of these scores were annotated in increments of 0.2, so we simply rounded any score to the nearest increment of 0.2 and converted the result to a literal string representation of the number"
+                },
+                {
+                    "page": 9,
+                    "text": "This effectively recasts the STS-B regression problem as a 21-class classification problem."
+                }
+            ]
+        },
+        {
+            "id": 33,
+            "query": "What happens if the model outputs text that does not match any valid label on a classification task?",
+            "level": 2,
+            "passages": [
+                {
+                    "page": 8,
+                    "text": "In this case, we always count the model’s output as wrong, though we never observed this behavior in any of our trained models."
+                }
+            ]
+        },
+        {
+            "id": 34,
+            "query": "What is a prefix LM, and how does it relate to an encoder-decoder model?",
+            "level": 2,
+            "passages": [
+                {
+                    "page": 18,
+                    "text": "Instead of using a causal mask, we use fully-visible masking during the prefix portion of the sequence."
+                },
+                {
+                    "page": 18,
+                    "text": "This architecture is similar to an encoder-decoder model with parameters shared across the encoder and decoder and with the encoder-decoder attention replaced with full attention across the input and target sequence."
+                }
+            ]
+        },
+        {
+            "id": 36,
+            "query": "What is gradual unfreezing, and how did it affect performance?",
+            "level": 2,
+            "passages": [
+                {
+                    "page": 29,
+                    "text": "In gradual unfreezing, more and more of the model’s parameters are fine-tuned over time."
+                },
+                {
+                    "page": 30,
+                    "text": "We found that gradual unfreezing caused a minor degradation in performance across all tasks, though it did provide some speedup during fine-tuning."
+                }
+            ]
+        },
+        {
+            "id": 37,
+            "query": "What happens when the pre-training data set is small enough to be repeated many times?",
+            "level": 2,
+            "passages": [
+                {
+                    "page": 28,
+                    "text": "As expected, performance degrades as the data set size shrinks. We suspect this may be due to the fact that the model begins to memorize the pre-training data set."
+                },
+                {
+                    "page": 28,
+                    "text": "We note that these effects are limited when the pre-training data set is repeated only 64 times."
+                }
+            ]
+        },
+        {
+            "id": 38,
+            "query": "What strategies were compared for setting the mixing proportions in multi-task training?",
+            "level": 2,
+            "passages": [
+                {
+                    "page": 31,
+                    "text": "As such, a natural way to set the mixing proportions is to sample in proportion to the size of each task’s data set."
+                },
+                {
+                    "page": 31,
+                    "text": "An alternative way of mitigating the huge disparity between data set sizes is to adjust the “temperature” of the mixing rates."
+                },
+                {
+                    "page": 32,
+                    "text": "Equal mixing In this case, we sample examples from each task with equal probability."
+                }
+            ]
+        },
+        {
+            "id": 39,
+            "query": "How did changing the corruption rate affect performance?",
+            "level": 2,
+            "passages": [
+                {
+                    "page": 23,
+                    "text": "Overall, we find that the corruption rate had a limited effect on the model’s performance. The only exception is that the largest corruption rate we consider (50%) results in a significant degradation of performance on GLUE and SQuAD."
+                }
+            ]
+        },
+        {
+            "id": 40,
+            "query": "How did the authors use ensembling as a way to scale?",
+            "level": 2,
+            "passages": [
+                {
+                    "page": 35,
+                    "text": "To compare other scaling methods to ensembling, we also measure the performance of an ensemble of 4 separately pre-trained and fine-tuned models. We average the logits across the ensemble before feeding them into the output softmax nonlinearity to obtain an aggregate prediction."
+                },
+                {
+                    "page": 35,
+                    "text": "Our results also suggest that ensembling provides an orthogonal and effective means of improving performance through scale."
+                }
+            ]
+        },
+        {
+            "id": 41,
+            "query": "How does T5's position embedding scheme work?",
+            "level": 2,
+            "passages": [
+                {
+                    "page": 5,
+                    "text": "We use a simplified form of position embeddings where each “embedding” is simply a scalar that is added to the corresponding logit used for computing the attention weights."
+                }
+            ]
+        },
+        {
+            "id": 42,
+            "query": "How much does pre-training help compared with training from scratch?",
+            "level": 2,
+            "passages": [
+                {
+                    "page": 14,
+                    "text": "Unsurprisingly, we find that pre-training provides significant gains across almost all benchmarks. The only exception is WMT English to French, which is a large"
+                },
+                {
+                    "page": 15,
+                    "text": "enough data set that gains from pre-training tend to be marginal."
+                }
+            ]
+        },
+        {
+            "id": 43,
+            "query": "How did the authors estimate run-to-run variance in their experiments?",
+            "level": 2,
+            "passages": [
+                {
+                    "page": 14,
+                    "text": "As a cheaper alternative, we train our baseline model 10 times from scratch (i.e. with different random initializations and data set shuffling) and assume that the variance over these runs of the base model also applies to each experimental variant."
+                }
+            ]
+        },
+        {
+            "id": 44,
+            "query": "Why did the authors choose to formulate NLP tasks as text-to-text problems?",
+            "level": 3,
+            "passages": [
+                {
+                    "page": 2,
+                    "text": "Motivated by a need for more rigorous understanding, we leverage a unified approach to transfer learning that allows us to systematically study different approaches and push the current limits of the field."
+                },
+                {
+                    "page": 2,
+                    "text": "Crucially, the text-to-text framework allows us to directly apply the same model, objective, training procedure, and decoding process to every task we consider."
+                },
+                {
+                    "page": 3,
+                    "text": "With this unified approach, we can compare the effectiveness of different transfer learning objectives, unlabeled data sets, and other factors, while exploring the limits of transfer learning for NLP by scaling up models and data sets beyond what has previously been considered."
+                },
+                {
+                    "page": 41,
+                    "text": "Text-to-text Our text-to-text framework provides a simple way to train a single model on a wide variety of text tasks using the same loss function and decoding procedure."
+                }
+            ]
+        },
+        {
+            "id": 45,
+            "query": "What are the main differences between the encoder-decoder architecture and decoder-only architectures considered in the paper?",
+            "level": 3,
+            "passages": [
+                {
+                    "page": 15,
+                    "text": "The first model structure we consider is an an encoder-decoder Transformer, which consists of two layer stacks: The encoder, which is fed an input sequence, and the decoder, which produces a new output sequence."
+                },
+                {
+                    "page": 16,
+                    "text": "As such, a Transformer decoder (without an encoder) can be used as a language model (LM), i.e. a model trained solely for next-step prediction"
+                },
+                {
+                    "page": 17,
+                    "text": "A fundamental and frequently cited drawback of using a language model in the text-to-text setting is that causal masking forces the model’s representation of the ith entry of the input sequence to only depend on the entries up until i."
+                },
+                {
+                    "page": 18,
+                    "text": "To see why, first note an encoder-decoder model with L layers in the encoder and L layers in the decoder has approximately the same number of parameters as a language model with 2L layers. However, the same L + L encoder-decoder model will have approximately the same computational cost as a language model with only L layers."
+                },
+                {
+                    "page": 20,
+                    "text": "We also note that the shared parameter encoder-decoder outperforms the decoder-only prefix LM, suggesting that the addition of an explicit encoder-decoder attention is beneficial."
+                },
+                {
+                    "page": 41,
+                    "text": "Though an encoder-decoder model uses twice as many parameters as “encoder-only” (e.g. BERT) or “decoder-only” (language model) architectures, it has a similar computational cost."
+                }
+            ]
+        },
+        {
+            "id": 46,
+            "query": "What factors did the authors find to be important for effective transfer learning?",
+            "level": 3,
+            "passages": [
+                {
+                    "page": 41,
+                    "text": "This suggests that scale is not the only factor that contributes to T5’s success. We hypothesize that the larger models benefit not only from their increased size but also from these non-scaling factors."
+                },
+                {
+                    "page": 41,
+                    "text": "Architectures While some work on transfer learning for NLP has considered architectural variants of the Transformer, we found the original encoder-decoder form worked best in our text-to-text framework."
+                },
+                {
+                    "page": 42,
+                    "text": "Unsupervised objectives Overall, we found that most “denoising” objectives, which train the model to reconstruct randomly corrupted text, performed similarly in the text-to-text setup."
+                },
+                {
+                    "page": 42,
+                    "text": "This motivates the use of a large and diverse data set like C4 for generic language understanding tasks."
+                },
+                {
+                    "page": 42,
+                    "text": "Training strategies We found that the basic approach of updating all of a pre-trained model’s parameters during fine-tuning outperformed methods that are designed to update fewer parameters, although updating all parameters is most expensive."
+                },
+                {
+                    "page": 42,
+                    "text": "Scaling We compared various strategies for taking advantage of additional compute, includ-ing training the model on more data, training a larger model, and using an ensemble of models. We found each approach conferred a significant boost in performance"
+                }
+            ]
+        },
+        {
+            "id": 47,
+            "query": "What were the main conclusions of the systematic study conducted in the paper?",
+            "level": 3,
+            "passages": [
+                {
+                    "page": 41,
+                    "text": "Having completed our systematic study, we wrap up by first recapping some of our most significant findings."
+                },
+                {
+                    "page": 41,
+                    "text": "In spite of its simplicity, we found the text-to-text framework obtained comparable performance to task-specific architectures and ultimately produced state-of-the-art results when combined with scale."
+                },
+                {
+                    "page": 41,
+                    "text": "Architectures While some work on transfer learning for NLP has considered architectural variants of the Transformer, we found the original encoder-decoder form worked best in our text-to-text framework."
+                },
+                {
+                    "page": 42,
+                    "text": "Unsupervised objectives Overall, we found that most “denoising” objectives, which train the model to reconstruct randomly corrupted text, performed similarly in the text-to-text setup."
+                },
+                {
+                    "page": 42,
+                    "text": "Pushing the limits We combined our above insights and trained substantially larger models (up to 11 billion parameters) to achieve state-of-the-art results across many of the benchmarks we considered."
+                }
+            ]
+        },
+        {
+            "id": 48,
+            "query": "How does T5's text-to-text framework differ from earlier unified frameworks such as the Natural Language Decathlon?",
+            "level": 3,
+            "passages": [
+                {
+                    "page": 9,
+                    "text": "McCann et al. (2018) propose the “Natural Language Decathlon”, a benchmark that uses a consistent question-answering format for a suite of ten NLP tasks."
+                },
+                {
+                    "page": 9,
+                    "text": "We instead allow for separately fine-tuning the model on each individual task and use short task prefixes instead of an explicit question-answer format."
+                },
+                {
+                    "page": 9,
+                    "text": "In contrast, our framework also allows for generative tasks like machine translation and abstractive summarization where it is not possible to enumerate all possible output choices."
+                }
+            ]
+        },
+        {
+            "id": 51,
+            "query": "Why did the final T5 models use C4 instead of the domain-specific data sets that sometimes performed better?",
+            "level": 3,
+            "passages": [
+                {
+                    "page": 36,
+                    "text": "However, these data set variants are sufficiently small that they would be repeated hundreds of times over the course of pre-training on 1 trillion tokens. Since we showed in Section 3.4.2 that this repetition could be harmful, we opted instead to continue using the C4 data"
+                },
+                {
+                    "page": 28,
+                    "text": "However, given that additional pre-training can be beneficial (as we will show in Section 3.6) and that obtaining additional unlabeled data is cheap and easy, we suggest using large pre-training data sets whenever possible."
+                }
+            ]
+        },
+        {
+            "id": 52,
+            "query": "How does multi-task training compare with pre-training followed by fine-tuning, and how can the gap be closed?",
+            "level": 3,
+            "passages": [
+                {
+                    "page": 32,
+                    "text": "In general, we find that multi-task training underperforms pre-training followed by fine-tuning on most tasks."
+                },
+                {
+                    "page": 31,
+                    "text": "An additional issue is the potential for “task interference” or “negative transfer”, where achieving good performance on one task can hinder performance on another."
+                },
+                {
+                    "page": 33,
+                    "text": "We find that fine-tuning after multi-task pre-training results in comparable performance to our baseline."
+                }
+            ]
+        },
+        {
+            "id": 54,
+            "query": "Why do the authors recommend pre-training objectives that produce short target sequences?",
+            "level": 3,
+            "passages": [
+                {
+                    "page": 23,
+                    "text": "The two variants that do not require predicting the full original sequence (“replace corrupted spans” and “drop corrupted spans”) are both potentially attractive since they make the target sequences shorter and consequently make training faster."
+                },
+                {
+                    "page": 24,
+                    "text": "This implies that choosing among the denoising objectives we considered here should mainly be done according to their computational cost."
+                },
+                {
+                    "page": 42,
+                    "text": "As a result, we suggest using objectives that produce short target sequences so that unsupervised pre-training is more computationally efficient."
+                }
+            ]
+        },
+        {
+            "id": 55,
+            "query": "How much of T5's performance comes from scale versus the other design choices from the study?",
+            "level": 3,
+            "passages": [
+                {
+                    "page": 40,
+                    "text": "Given this, we were interested to measure how much the “non-scaling” changes we introduced into T5 contributed to its strong performance."
+                },
+                {
+                    "page": 41,
+                    "text": "Nevertheless, T5-Base substantially outperforms baseline-1T on all downstream tasks. This suggests that scale is not the only factor that contributes to T5’s success."
+                }
+            ]
+        },
+        {
+            "id": 56,
+            "query": "How does the domain of the pre-training data relate to performance on specific downstream tasks?",
+            "level": 3,
+            "passages": [
+                {
+                    "page": 27,
+                    "text": "MultiRC is a reading comprehension data set whose largest source of data comes from fiction books, which is exactly the domain covered by TBC."
+                },
+                {
+                    "page": 27,
+                    "text": "Similarly, using the RealNews-like data set for pre-training conferred an increase from 68.16 to 73.72 on the Exact Match score for ReCoRD, a data set that measures reading comprehension on news articles."
+                },
+                {
+                    "page": 43,
+                    "text": "We observed that pre-training on unlabeled in-domain data can improve performance on downstream tasks (Section 3.4)."
+                }
+            ]
+        },
+        {
+            "id": 57,
+            "query": "How did T5's performance change as model size increased, and what does the paper suggest about scaling?",
+            "level": 4,
+            "passages": [
+                {
+                    "page": 35,
+                    "text": "In general, increasing the model size resulted in an additional bump in performance compared to solely increasing the training time or batch size."
+                },
+                {
+                    "page": 38,
+                    "text": "As expected, our largest (11 billion parameter) model performed best among our model size variants across all tasks. Our T5-3B model variant did beat the previous state of the art in a few tasks, but scaling the model size to 11 billion parameters was the most important ingredient for achieving our best performance."
+                },
+                {
+                    "page": 41,
+                    "text": "This suggests that scale is not the only factor that contributes to T5’s success."
+                },
+                {
+                    "page": 42,
+                    "text": "We found each approach conferred a significant boost in performance, though training a smaller model on more data was often outperformed by training a larger model for fewer steps."
+                },
+                {
+                    "page": 43,
+                    "text": "An unsurprising but important result from our study is that larger models tend to perform better. The fact that the hardware used for running these models is continually getting cheaper and more powerful suggests that scaling up may continue to be a promising way to achieve better performance"
+                }
+            ]
+        },
+        {
+            "id": 59,
+            "query": "What future research directions do the authors propose?",
+            "level": 4,
+            "passages": [
+                {
+                    "page": 43,
+                    "text": "As a result, we advocate for research on methods that achieve stronger performance with cheaper models so that transfer learning can be applied where it will have the most impact."
+                },
+                {
+                    "page": 43,
+                    "text": "We suspect that this simplistic technique may not be a very efficient way to teach the model general-purpose knowledge."
+                },
+                {
+                    "page": 43,
+                    "text": "It would be useful to formulate a more rigorous notion of the “similarity” between the pre-training and downstream tasks, so that we could make more principled choices about what source of unlabeled data to use."
+                },
+                {
+                    "page": 43,
+                    "text": "To address these issues, we are interested in further investigating language-agnostic models, i.e. models that can perform a given NLP task with good performance regardless of the text’s language."
+                }
+            ]
+        },
+        {
+            "id": 60,
+            "query": "How did the pre-training objective evolve from the baseline to the final T5 model?",
+            "level": 4,
+            "passages": [
+                {
+                    "page": 13,
+                    "text": "Inspired by BERT’s “masked language modeling” objective and the “word dropout” regularization technique (Bowman et al., 2015), we design an objective that randomly samples and then drops out 15% of tokens in the input sequence."
+                },
+                {
+                    "page": 22,
+                    "text": "First, instead of replacing each corrupted token with a mask token, we replace the entirety of each consecutive span of corrupted tokens with a unique mask token."
+                },
+                {
+                    "page": 24,
+                    "text": "We also find in particular that using an average span length of 3 slightly (but significantly) outperforms the i.i.d. objective on most non-translation benchmarks."
+                },
+                {
+                    "page": 36,
+                    "text": "Objective We swap out the i.i.d. denoising objective in our baseline for the span-corruption objective described in Section 3.3.4, which was loosely inspired by SpanBERT (Joshi et al., 2019)."
+                }
+            ]
+        },
+        {
+            "id": 61,
+            "query": "What trade-offs between computational cost and performance come up throughout the paper?",
+            "level": 4,
+            "passages": [
+                {
+                    "page": 18,
+                    "text": "However, the same L + L encoder-decoder model will have approximately the same computational cost as a language model with only L layers."
+                },
+                {
+                    "page": 24,
+                    "text": "This implies that choosing among the denoising objectives we considered here should mainly be done according to their computational cost."
+                },
+                {
+                    "page": 36,
+                    "text": "inference more expensive. In contrast, the cost of pre-training a small model for longer is effectively amortized if it is applied to many downstream tasks."
+                },
+                {
+                    "page": 42,
+                    "text": "We found that the basic approach of updating all of a pre-trained model’s parameters during fine-tuning outperformed methods that are designed to update fewer parameters, although updating all parameters is most expensive."
+                }
+            ]
+        },
+        {
+            "id": 62,
+            "query": "Where does T5 fall short of or exceed human performance, and what does that suggest about the benchmarks?",
+            "level": 4,
+            "passages": [
+                {
+                    "page": 40,
+                    "text": "Interestingly, on the reading comprehension tasks (MultiRC and ReCoRD) we exceed human performance by a large margin, suggesting the evaluation metrics used for these tasks may be biased towards machine-made predictions. On the other hand, humans achieve 100% accuracy on both COPA and WSC, which is significantly better than our model’s performance."
+                },
+                {
+                    "page": 40,
+                    "text": "Human performance on SQuAD is estimated at 82.30 and 91.22 for the Exact Match and F1 metric respectively (Rajpurkar et al., 2016), so it is not clear if further improvements on this benchmark are meaningful."
+                },
+                {
+                    "page": 40,
+                    "text": "It has been shown that improvements to the ROUGE score do not necessarily correspond to more coherent summaries (Paulus et al., 2017)."
+                }
+            ]
+        },
+        {
+            "id": 63,
+            "query": "What changes were made to the baseline setup to produce the final T5 models?",
+            "level": 4,
+            "passages": [
+                {
+                    "page": 36,
+                    "text": "We start with our baseline training approach and make the following changes:"
+                },
+                {
+                    "page": 36,
+                    "text": "Objective We swap out the i.i.d. denoising objective in our baseline for the span-corruption objective described in Section 3.3.4"
+                },
+                {
+                    "page": 36,
+                    "text": "We therefore pre-train our models for 1 million steps on a batch size of 211 sequences of length 512, corresponding to a total of about 1 trillion pre-training tokens (about 32× as many as our baseline)."
+                },
+                {
+                    "page": 37,
+                    "text": "We therefore used multi-task pre-training in our final set of experiments."
+                },
+                {
+                    "page": 37,
+                    "text": "We therefore use a smaller batch size of 8 length-512 sequences during fine-tuning for each GLUE and SuperGLUE task."
+                },
+                {
+                    "page": 38,
+                    "text": "Specifically, we use a beam width of 4 and a length penalty of α = 0.6 (Wu et al., 2016) for the WMT translation and CNN/DM summarization"
+                }
+            ]
+        },
+        {
+            "id": 64,
+            "query": "Who invented the Transformer architecture?",
+            "level": -1,
+            "passages": []
+        },
+        {
+            "id": 66,
+            "query": "What is the capital of Canada?",
+            "level": -1,
+            "passages": []
+        },
+        {
+            "id": 67,
+            "query": "Who is the current CEO of Google?",
+            "level": -1,
+            "passages": []
+        },
+        {
+            "id": 68,
+            "query": "How many parameters does GPT-5 have?",
+            "level": -1,
+            "passages": []
+        },
+        {
+            "id": 69,
+            "query": "How much did it cost in dollars to train T5-11B?",
+            "level": -1,
+            "passages": []
+        },
+        {
+            "id": 70,
+            "query": "How does T5 perform on the ImageNet image classification benchmark?",
+            "level": -1,
+            "passages": []
+        },
+        {
+            "id": 71,
+            "query": "What learning rate was used to pre-train BERT?",
+            "level": -1,
+            "passages": []
+        },
+        {
+            "id": 72,
+            "query": "What score does T5 achieve on the MMLU benchmark?",
+            "level": -1,
+            "passages": []
+        },
+        {
+            "id": 74,
+            "query": "How many languages does mT5 support?",
+            "level": -1,
+            "passages": []
+        },
+        {
+            "id": 75,
+            "query": "How many days did it take to train T5-11B?",
+            "level": -1,
+            "passages": []
+        }
+    ]
+}

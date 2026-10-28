@@ -1,0 +1,224 @@
+{
+    "file_name": "exploring_the_limits_of_transfer_learning_with_a_unified_text-to-text_transformer",
+    "queries": [
+        {
+            "id": 0,
+            "query": "What does T5 stand for?",
+            "level": 1,
+            "passages": [
+                {
+                    "page": 3,
+                    "text": "“T5” refers to our model, which we dub the “Text-to-Text Transfer Transformer”."
+                },
+                {
+                    "page": 4,
+                    "text": "We refer to our model and framework as the “Text-to-Text Transfer Transformer” (T5)."
+                }
+            ]
+        },
+        {
+            "id": 6,
+            "query": "What downstream tasks or benchmarks were used to evaluate T5?",
+            "level": 1,
+            "passages": [
+                {
+                    "page": 7,
+                    "text": "As such, we study downstream performance on a diverse set of benchmarks, including machine translation, question answering, abstractive summarization, and text classification. Specifically, we measure performance on the GLUE and SuperGLUE text classification meta-benchmarks; CNN/Daily Mail abstractive summarization; SQuAD question answering; and WMT English to German, French, and Romanian translation."
+                }
+            ]
+        },
+        {
+            "id": 13,
+            "query": "What beam search settings are used for the final T5 models?",
+            "level": 1,
+            "passages": [
+                {
+                    "page": 38,
+                    "text": "For tasks with long output sequences, we found improved performance from using beam search (Sutskever et al., 2014). Specifically, we use a beam width of 4 and a length penalty of α = 0.6 (Wu et al., 2016) for the WMT translation and CNN/DM summarization"
+                }
+            ]
+        },
+        {
+            "id": 15,
+            "query": "What fraction of tokens is corrupted in the baseline denoising objective?",
+            "level": 1,
+            "passages": [
+                {
+                    "page": 13,
+                    "text": "we design an objective that randomly samples and then drops out 15% of tokens in the input sequence."
+                },
+                {
+                    "page": 23,
+                    "text": "Based on these results and the historical precedent set by BERT, we will use a corruption rate of 15% going forward."
+                }
+            ]
+        },
+        {
+            "id": 22,
+            "query": "How many tokens were the final T5 models pre-trained on?",
+            "level": 1,
+            "passages": [
+                {
+                    "page": 36,
+                    "text": "We therefore pre-train our models for 1 million steps on a batch size of 211 sequences of length 512, corresponding to a total of about 1 trillion pre-training tokens (about 32× as many as our baseline)."
+                }
+            ]
+        },
+        {
+            "id": 26,
+            "query": "How does the T5 pre-training objective differ from BERT's masked language modeling objective?",
+            "level": 2,
+            "passages": [
+                {
+                    "page": 21,
+                    "text": "MLM takes a span of text and corrupts 15% of the tokens. 90% of the corrupted tokens are replaced with a special mask token and 10% are replaced with a random token. Since BERT is an encoder-only model, its goal during pre-training is to reconstruct masked tokens at the output of the encoder. In the encoder-decoder case, we simply use the entire uncorrupted sequence as the target. Note that this differs from our baseline objective, which uses only the corrupted tokens as targets"
+                },
+                {
+                    "page": 22,
+                    "text": "Second, we were interested to see if it was possible to avoid predicting the entire uncorrupted text span since this requires self-attention over long sequences in the decoder."
+                },
+                {
+                    "page": 23,
+                    "text": "The two variants that do not require predicting the full original sequence (“replace corrupted spans” and “drop corrupted spans”) are both potentially attractive since they make the target sequences shorter and consequently make training faster."
+                }
+            ]
+        },
+        {
+            "id": 27,
+            "query": "What effect did changing the pre-training dataset have on model performance?",
+            "level": 2,
+            "passages": [
+                {
+                    "page": 26,
+                    "text": "A first obvious takeaway is that removing the heuristic filtering from C4 uniformly degrades performance and makes the unfiltered variant perform the worst in every task. Beyond this, we found that in some cases a pre-training data set with a more constrained domain outperformed the diverse C4 data set."
+                },
+                {
+                    "page": 27,
+                    "text": "The main lesson behind these findings is that pre-training on in-domain unlabeled data can improve performance on downstream tasks."
+                },
+                {
+                    "page": 27,
+                    "text": "A drawback to only pre-training on a single domain is that the resulting data sets are often substantially smaller."
+                },
+                {
+                    "page": 42,
+                    "text": "When comparing C4 to data sets that use additional filtering, we found that training on in-domain unlabeled data could boost performance in a few downstream tasks. However, constraining to a single domain typically results in a smaller data set."
+                }
+            ]
+        },
+        {
+            "id": 32,
+            "query": "How are the Winograd tasks converted into a text-to-text format?",
+            "level": 2,
+            "passages": [
+                {
+                    "page": 9,
+                    "text": "We cast the WNLI, WSC, and DPR tasks as text-to-text problems by highlighting the ambiguous pronoun in the text passage and asking the model to predict the noun that it refers to."
+                },
+                {
+                    "page": 45,
+                    "text": "Instead, when evaluating on the WNLI test set (for the results in Section 3.7), we convert the WNLI test set to the “referent noun prediction” text-to-text format so that we can evaluate using a model trained on WSC and DPR."
+                }
+            ]
+        },
+        {
+            "id": 35,
+            "query": "What are adapter layers, and how well did they work for fine-tuning?",
+            "level": 2,
+            "passages": [
+                {
+                    "page": 29,
+                    "text": "Adapter layers are additional dense-ReLU-dense blocks that are added after each of the preexisting feed-forward networks in each block of the Transformer."
+                },
+                {
+                    "page": 30,
+                    "text": "we find that lower-resource tasks like SQuAD work well with a small value of d whereas higher resource tasks require a large dimensionality to achieve reasonable performance."
+                }
+            ]
+        },
+        {
+            "id": 49,
+            "query": "Why did the authors not include an encoder-only model like BERT among the architectures they compared?",
+            "level": 3,
+            "passages": [
+                {
+                    "page": 10,
+                    "text": "For example, “encoder-only” models like BERT (Devlin et al., 2018) are designed to produce a single prediction per input token or a single prediction for an entire input sequence. This makes them applicable for classification or span prediction tasks but not for generative tasks like translation or abstractive summarization."
+                }
+            ]
+        },
+        {
+            "id": 50,
+            "query": "What are the limitations of the experimental methodology used in the systematic study?",
+            "level": 3,
+            "passages": [
+                {
+                    "page": 10,
+                    "text": "We systematically study these contributions by taking a reasonable baseline (described in Section 3.1) and altering one aspect of the setup at a time."
+                },
+                {
+                    "page": 10,
+                    "text": "This “coordinate ascent” approach might miss second-order effects (for example, some particular unsupervised objective may work best on a model larger than our baseline setting), but performing a combinatorial exploration of all of the factors in our study would be prohibitively expensive."
+                }
+            ]
+        },
+        {
+            "id": 53,
+            "query": "Why didn't T5 achieve state-of-the-art results on machine translation?",
+            "level": 3,
+            "passages": [
+                {
+                    "page": 40,
+                    "text": "This may be in part due to our use of an English-only unlabeled data set. We also note that most of the best results on these tasks use backtranslation (Edunov et al., 2018; Lample and Conneau, 2019), which is a sophisticated data augmentation scheme."
+                },
+                {
+                    "page": 43,
+                    "text": "We were disappointed to find that English-only pre-training did not achieve state-of-the-art results on the translation tasks we studied."
+                }
+            ]
+        },
+        {
+            "id": 58,
+            "query": "How did the T5 framework compare with prior state-of-the-art approaches across the evaluated tasks?",
+            "level": 4,
+            "passages": [
+                {
+                    "page": 38,
+                    "text": "Overall, we achieved state-of-the-art performance on 18 out of the 24 tasks we consider."
+                },
+                {
+                    "page": 38,
+                    "text": "We achieved a state-of-the-art average GLUE score of 90.3."
+                },
+                {
+                    "page": 38,
+                    "text": "For SQuAD, we outperformed the previous state-of-the-art (ALBERT (Lan et al., 2019)) by over one point on the Exact Match score."
+                },
+                {
+                    "page": 40,
+                    "text": "For SuperGLUE, we improved upon the state-of-the-art by a large margin (from an average score of 84.6 (Liu et al., 2019c) to 88.9)."
+                },
+                {
+                    "page": 40,
+                    "text": "We did not achieve state-of-the-art performance on any of the WMT translation tasks."
+                },
+                {
+                    "page": 40,
+                    "text": "Finally, on CNN/Daily Mail we attain state-of-the-art performance, though only by a significant amount on the ROUGE-2-F score."
+                }
+            ]
+        },
+        {
+            "id": 65,
+            "query": "What is the learning rate used to train GPT-4?",
+            "level": -1,
+            "passages": []
+        },
+        {
+            "id": 73,
+            "query": "Which reinforcement learning from human feedback method was used to align T5?",
+            "level": -1,
+            "passages": []
+        }
+    ]
+}
